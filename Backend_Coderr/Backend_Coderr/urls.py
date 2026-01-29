@@ -24,8 +24,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('markt_coderr.api.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'),
+         name='swagger-ui'),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

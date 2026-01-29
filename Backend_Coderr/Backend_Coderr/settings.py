@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'markt_coderr',
     'corsheaders',
     'drf_spectacular',
-    
+
 ]
 
 MIDDLEWARE = [

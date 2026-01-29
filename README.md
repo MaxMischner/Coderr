@@ -21,6 +21,8 @@ Backend‑API für das Coderr‑Frontend (Vanilla JS). Dieses Repository enthäl
 ## Setup
 
 ```text
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -54,6 +56,8 @@ API‑Base: `http://127.0.0.1:8000/api/`
 - Schema JSON: `http://127.0.0.1:8000/api/schema/`
 - Swagger UI: `http://127.0.0.1:8000/api/docs/`
 
+Dokumentation basiert auf drf-spectacular.
+
 ## Frontend starten
 
 ```text
@@ -66,6 +70,19 @@ Frontend: `http://127.0.0.1:5500/`
 
 ```text
 python Backend_Coderr/manage.py test
+```
+
+## Code-Qualität
+
+- PEP8-konform formatiert
+- Dokumentation per Docstrings
+- Ziel: Test-Coverage ≥ 95%
+
+Coverage ausführen:
+
+```text
+python -m coverage run Backend_Coderr/manage.py test
+python -m coverage report -m
 ```
 
 ## Media / Uploads
