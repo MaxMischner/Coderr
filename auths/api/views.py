@@ -4,7 +4,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..serializers import LoginSerializer, RegistrationSerializer
+from auths.api.serializers import LoginSerializer, RegistrationSerializer
 
 
 class RegistrationView(APIView):

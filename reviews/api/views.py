@@ -5,10 +5,10 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ...models import Review
-from ..permissions import IsCustomerUser, IsReviewOwner
-from ..serializers import ReviewCreateSerializer, ReviewSerializer, ReviewUpdateSerializer
-from .utils import _apply_ordering, _get_ordering_param
+from common.permissions import IsCustomerUser, IsReviewOwner
+from common.utils import _apply_ordering, _get_ordering_param
+from markt_coderr.models import Review
+from reviews.api.serializers import ReviewCreateSerializer, ReviewSerializer, ReviewUpdateSerializer
 
 
 def _filter_reviews_by_business(queryset, request):

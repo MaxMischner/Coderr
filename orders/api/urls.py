@@ -1,6 +1,6 @@
 from django.urls import path
 
-from orders.views import (
+from orders.api.views import (
     CompletedOrderCountView,
     OrderCountView,
     OrdersListCreateView,

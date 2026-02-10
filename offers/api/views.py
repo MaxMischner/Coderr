@@ -6,21 +6,21 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ...models import Offer, OfferDetail
-from ..permissions import IsOfferOwner
-from ..serializers import (
-    OfferCreateSerializer,
-    OfferDetailSerializer,
-    OfferDetailViewSerializer,
-    OfferListSerializer,
-    OfferUpdateSerializer,
-)
-from .utils import (
+from common.permissions import IsOfferOwner
+from common.utils import (
     _apply_ordering,
     _get_authenticated_user,
     _get_business_profile_or_response,
     _get_ordering_param,
     _paginated_response,
+)
+from markt_coderr.models import Offer, OfferDetail
+from offers.api.serializers import (
+    OfferCreateSerializer,
+    OfferDetailSerializer,
+    OfferDetailViewSerializer,
+    OfferListSerializer,
+    OfferUpdateSerializer,
 )
 
 

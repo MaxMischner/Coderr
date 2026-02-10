@@ -1,6 +1,6 @@
 from django.urls import path
 
-from offers.views import (
+from offers.api.views import (
     OfferDetailRetrieveView,
     OfferDetailUpdateDeleteView,
     OffersListCreateView,

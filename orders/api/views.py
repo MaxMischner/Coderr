@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from common.permissions import IsCustomerUser, IsOrderBusinessOwner, IsStaffUser
 from common.utils import _get_or_create_profile
 from markt_coderr.models import OfferDetail, Order, Profile
-from orders.serializers import OrderSerializer, OrderStatusUpdateSerializer
+from orders.api.serializers import OrderSerializer, OrderStatusUpdateSerializer
 
 User = get_user_model()
 
