@@ -1,7 +1,3 @@
-import unittest
-
-raise unittest.SkipTest("Deprecated tests moved to orders app.")
-
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model

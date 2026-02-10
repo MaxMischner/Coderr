@@ -1,0 +1,69 @@
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+
+class RegistrationApiTests(APITestCase):
+    def setUp(self):
+        self.url = "/api/registration/"
+        self.payload = {
+            "username": "exampleUsername",
+            "email": "example@mail.de",
+            "password": "examplePassword",
+            "repeated_password": "examplePassword",
+            "type": "customer",
+        }
+
+    def test_registration_success(self):
+        response = self.client.post(self.url, self.payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.json()
+        _assert_auth_payload(self, data)
+        self.assertEqual(data["username"], self.payload["username"])
+        self.assertEqual(data["email"], self.payload["email"])
+
+    def test_registration_password_mismatch_returns_400(self):
+        payload = {**self.payload, "repeated_password": "differentPassword"}
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_registration_missing_required_fields_returns_400(self):
+        response = self.client.post(self.url, {"username": "only"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class LoginApiTests(APITestCase):
+    def setUp(self):
+        self.user_model = get_user_model()
+        self.user = _create_user(self.user_model, "exampleUsername", "example@mail.de", "examplePassword")
+        self.url = "/api/login/"
+        self.payload = {
+            "username": "exampleUsername",
+            "password": "examplePassword",
+        }
+
+    def test_login_success(self):
+        response = self.client.post(self.url, self.payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        _assert_auth_payload(self, data)
+        self.assertEqual(data["username"], self.payload["username"])
+        self.assertEqual(data["email"], self.user.email)
+
+    def test_login_invalid_credentials_returns_400(self):
+        response = self.client.post(self.url, {"username": "exampleUsername", "password": "wrong"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+def _assert_auth_payload(testcase, data):
+    for key in ["token", "username", "email", "user_id"]:
+        testcase.assertIn(key, data)
+
+
+def _create_user(user_model, username, email, password, **kwargs):
+    return user_model.objects.create_user(username=username, email=email, password=password, **kwargs)
