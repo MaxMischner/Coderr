@@ -71,7 +71,16 @@ class ProfileDetailApiTests(APITestCase):
         )
         self.other_user = _create_user(
             self.user_model, "other_user", "other@business.de", "testpass123")
+        self.business_user = _create_user(
+            self.user_model,
+            "business_max",
+            "new_email@business.de",
+            "testpass123",
+            first_name="Max",
+            last_name="Mustermann",
+        )
         self.url = f"/api/profile/{self.user.pk}/"
+        self.business_url = f"/api/profile/{self.business_user.pk}/"
 
     def test_get_profile_requires_authentication(self):
         response = self.client.get(self.url)
@@ -119,6 +128,33 @@ class ProfileDetailApiTests(APITestCase):
         data = response.json()
         for key, value in payload.items():
             self.assertEqual(data[key], value)
+        _assert_non_null_strings(
+            self,
+            data,
+            ["first_name", "last_name", "location",
+                "tel", "description", "working_hours"],
+        )
+
+    def test_patch_business_profile_updates_fields_and_non_null_strings(self):
+        self.client.force_authenticate(user=self.business_user)
+
+        payload = {
+            "first_name": "Max",
+            "last_name": "Mustermann",
+            "location": "Berlin",
+            "tel": "987654321",
+            "description": "Updated business description",
+            "working_hours": "10-18",
+            "email": "new_email@business.de",
+        }
+
+        response = self.client.patch(self.business_url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        for key, value in payload.items():
+            self.assertEqual(data[key], value)
+        self.assertEqual(data["type"], "business")
         _assert_non_null_strings(
             self,
             data,

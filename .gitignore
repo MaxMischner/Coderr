@@ -185,3 +185,6 @@ cython_debug/
 # Frontend
 Coderr/
 Coderr/**
+
+# Legacy/old code
+old code/
