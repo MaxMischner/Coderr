@@ -25,12 +25,18 @@ def _orders_for_user(user):
 def _get_offer_detail_or_response(request):
     """Return offer detail or a bad request response."""
     if "offer_detail_id" not in request.data:
-        return None, Response(status=status.HTTP_400_BAD_REQUEST)
+        return None, Response(
+            {"detail": "offer_detail_id is required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     try:
         offer_detail_id = request.data.get("offer_detail_id")
         offer_detail = get_object_or_404(OfferDetail, pk=offer_detail_id)
     except (TypeError, ValueError):
-        return None, Response(status=status.HTTP_400_BAD_REQUEST)
+        return None, Response(
+            {"detail": "offer_detail_id must be an integer."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     return offer_detail, None
 
 
@@ -58,7 +64,10 @@ class OrdersListCreateView(APIView):
 
     def post(self, request):
         if not IsCustomerUser().has_permission(request, self):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Only customers can create orders."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         offer_detail, response = _get_offer_detail_or_response(request)
         if response:
             return response
@@ -73,7 +82,10 @@ class OrdersUpdateDeleteView(APIView):
     def patch(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
         if not IsOrderBusinessOwner().has_object_permission(request, self, order):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Only the business owner can update this order."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = OrderStatusUpdateSerializer(
             order, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -82,7 +94,10 @@ class OrdersUpdateDeleteView(APIView):
 
     def delete(self, request, pk):
         if not IsStaffUser().has_permission(request, self):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Only staff can delete orders."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         order = get_object_or_404(Order, pk=pk)
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -96,7 +111,10 @@ class OrderCountView(APIView):
         user = get_object_or_404(User, pk=business_user_id)
         profile = _get_or_create_profile(user)
         if profile.type != Profile.TYPE_BUSINESS:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Business user not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         count = Order.objects.filter(
             business_user_id=business_user_id, status=Order.STATUS_IN_PROGRESS
         ).count()
@@ -111,7 +129,10 @@ class CompletedOrderCountView(APIView):
         user = get_object_or_404(User, pk=business_user_id)
         profile = _get_or_create_profile(user)
         if profile.type != Profile.TYPE_BUSINESS:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Business user not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         count = Order.objects.filter(
             business_user_id=business_user_id, status=Order.STATUS_COMPLETED
         ).count()

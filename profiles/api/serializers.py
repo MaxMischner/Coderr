@@ -104,9 +104,21 @@ class CustomerProfileListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["user", "username", "first_name",
-                  "last_name", "file", "type"]
+        fields = [
+            "user",
+            "username",
+            "first_name",
+            "last_name",
+            "file",
+            "location",
+            "tel",
+            "description",
+            "working_hours",
+            "type",
+        ]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        return _normalize_nulls(data, ["first_name", "last_name"])
+        keys = ["first_name", "last_name", "location",
+            "tel", "description", "working_hours"]
+        return _normalize_nulls(data, keys)

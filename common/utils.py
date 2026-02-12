@@ -65,7 +65,10 @@ def _get_business_profile_or_response(user):
     """Return business profile or a forbidden response."""
     profile = _get_or_create_profile(user, default_type=Profile.TYPE_BUSINESS)
     if profile.type != Profile.TYPE_BUSINESS:
-        return None, Response(status=status.HTTP_403_FORBIDDEN)
+        return None, Response(
+            {"detail": "User must be a business profile."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
     return profile, None
 
 

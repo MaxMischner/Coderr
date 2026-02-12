@@ -87,21 +87,30 @@ def _validate_offer_filters(request):
         try:
             int(creator_id)
         except (TypeError, ValueError):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "creator_id must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     min_price = request.query_params.get("min_price")
     if min_price not in (None, ""):
         try:
             Decimal(min_price)
         except (TypeError, ValueError, InvalidOperation):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "min_price must be a number."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     max_delivery_time = request.query_params.get("max_delivery_time")
     if max_delivery_time not in (None, ""):
         try:
             int(max_delivery_time)
         except (TypeError, ValueError):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "max_delivery_time must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     return None
 
@@ -114,6 +123,17 @@ def _create_offer_from_request(request):
     return serializer.save()
 
 
+def _get_authenticated_user_or_response(request):
+    """Return authenticated user or a 401 response."""
+    user = _get_authenticated_user(request)
+    if not user:
+        return None, Response(
+            {"detail": "Authentication credentials were not provided."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+    return user, None
+
+
 class OffersListCreateView(APIView):
     """List offers or create a new offer."""
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -122,7 +142,10 @@ class OffersListCreateView(APIView):
         allowed = {"updated_at", "-updated_at", "min_price", "-min_price"}
         ordering, is_valid = _get_ordering_param(request, allowed)
         if not is_valid:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid ordering parameter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         response = _validate_offer_filters(request)
         if response:
             return response
@@ -133,12 +156,9 @@ class OffersListCreateView(APIView):
         return _paginated_response(request, queryset, OfferListSerializer)
 
     def post(self, request):
-        user = request.user
-        if not user or not user.is_authenticated:
-            return Response(
-                {"detail": "Authentication credentials were not provided."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+        user, response = _get_authenticated_user_or_response(request)
+        if response:
+            return response
         _, response = _get_business_profile_or_response(user)
         if response:
             return response
@@ -153,15 +173,24 @@ class OfferDetailUpdateDeleteView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk):
+        _, response = _get_authenticated_user_or_response(request)
+        if response:
+            return response
         offer = get_object_or_404(Offer, pk=pk)
         serializer = OfferDetailViewSerializer(
             offer, context={"request": request})
         return Response(serializer.data)
 
     def patch(self, request, pk):
+        _, response = _get_authenticated_user_or_response(request)
+        if response:
+            return response
         offer = get_object_or_404(Offer, pk=pk)
         if not IsOfferOwner().has_object_permission(request, self, offer):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You do not have permission to modify this offer."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = OfferUpdateSerializer(
             offer, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
@@ -171,9 +200,15 @@ class OfferDetailUpdateDeleteView(APIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, pk):
+        _, response = _get_authenticated_user_or_response(request)
+        if response:
+            return response
         offer = get_object_or_404(Offer, pk=pk)
         if not IsOfferOwner().has_object_permission(request, self, offer):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You do not have permission to delete this offer."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         offer.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -183,6 +218,9 @@ class OfferDetailRetrieveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk):
+        _, response = _get_authenticated_user_or_response(request)
+        if response:
+            return response
         detail = get_object_or_404(OfferDetail, pk=pk)
         serializer = OfferDetailSerializer(detail)
         return Response(serializer.data)

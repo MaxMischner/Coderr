@@ -33,6 +33,31 @@ def _apply_reviews_filters(queryset, request):
     return _filter_reviews_by_reviewer(queryset, request)
 
 
+def _validate_review_filters(request):
+    """Validate review filter query params and return a response for bad input."""
+    business_user_id = request.query_params.get("business_user_id")
+    if business_user_id not in (None, ""):
+        try:
+            int(business_user_id)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "business_user_id must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    reviewer_id = request.query_params.get("reviewer_id")
+    if reviewer_id not in (None, ""):
+        try:
+            int(reviewer_id)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "reviewer_id must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    return None
+
+
 class ReviewsListCreateView(APIView):
     """List reviews or create a review."""
     permission_classes = [permissions.IsAuthenticated]
@@ -41,20 +66,32 @@ class ReviewsListCreateView(APIView):
         allowed = {"updated_at", "-updated_at", "rating", "-rating"}
         ordering, is_valid = _get_ordering_param(request, allowed)
         if not is_valid:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid ordering parameter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        response = _validate_review_filters(request)
+        if response:
+            return response
         queryset = _apply_reviews_filters(Review.objects.all(), request)
         queryset = _apply_ordering(queryset, ordering)
         return Response(ReviewSerializer(queryset, many=True).data)
 
     def post(self, request):
         if not IsCustomerUser().has_permission(request, self):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"detail": "Only customers can create reviews."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         serializer = ReviewCreateSerializer(
             data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         business_user_id = serializer.validated_data["business_user"].id
         if Review.objects.filter(business_user_id=business_user_id, reviewer=request.user).exists():
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You have already reviewed this business."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         review = serializer.save()
         return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
 
@@ -66,7 +103,10 @@ class ReviewsUpdateDeleteView(APIView):
     def patch(self, request, pk):
         review = get_object_or_404(Review, pk=pk)
         if not IsReviewOwner().has_object_permission(request, self, review):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You do not have permission to update this review."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = ReviewUpdateSerializer(
             review, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -76,6 +116,9 @@ class ReviewsUpdateDeleteView(APIView):
     def delete(self, request, pk):
         review = get_object_or_404(Review, pk=pk)
         if not IsReviewOwner().has_object_permission(request, self, review):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You do not have permission to delete this review."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
