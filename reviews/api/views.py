@@ -81,7 +81,7 @@ class ReviewsListCreateView(APIView):
         if not IsCustomerUser().has_permission(request, self):
             return Response(
                 {"detail": "Only customers can create reviews."},
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_403_FORBIDDEN,
             )
         serializer = ReviewCreateSerializer(
             data=request.data, context={"request": request})
@@ -90,7 +90,7 @@ class ReviewsListCreateView(APIView):
         if Review.objects.filter(business_user_id=business_user_id, reviewer=request.user).exists():
             return Response(
                 {"detail": "You have already reviewed this business."},
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         review = serializer.save()
         return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
