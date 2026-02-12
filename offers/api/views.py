@@ -116,6 +116,8 @@ def _create_offer_from_request(request):
 
 class OffersListCreateView(APIView):
     """List offers or create a new offer."""
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         allowed = {"updated_at", "-updated_at", "min_price", "-min_price"}
         ordering, is_valid = _get_ordering_param(request, allowed)
@@ -131,9 +133,12 @@ class OffersListCreateView(APIView):
         return _paginated_response(request, queryset, OfferListSerializer)
 
     def post(self, request):
-        user = _get_authenticated_user(request)
-        if not user:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response(
+                {"detail": "Authentication credentials were not provided."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         _, response = _get_business_profile_or_response(user)
         if response:
             return response
