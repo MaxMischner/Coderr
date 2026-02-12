@@ -151,6 +151,21 @@ class OffersListApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_get_offers_list_invalid_min_price_returns_400(self):
+        response = self.client.get(self.url, {"min_price": "not-a-number"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_offers_list_invalid_max_delivery_time_returns_400(self):
+        response = self.client.get(self.url, {"max_delivery_time": "invalid"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_offers_list_invalid_creator_id_returns_400(self):
+        response = self.client.get(self.url, {"creator_id": "invalid"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class OffersCreateApiTests(APITestCase):
     def setUp(self):

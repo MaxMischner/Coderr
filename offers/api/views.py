@@ -1,5 +1,7 @@
 """Offer views."""
 
+from decimal import Decimal, InvalidOperation
+
 from django.db.models import Min, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
@@ -78,6 +80,32 @@ def _apply_offers_filters(queryset, request):
     return _filter_offers_by_search(queryset, request)
 
 
+def _validate_offer_filters(request):
+    """Validate filter query params and return a response for bad input."""
+    creator_id = request.query_params.get("creator_id")
+    if creator_id not in (None, ""):
+        try:
+            int(creator_id)
+        except (TypeError, ValueError):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    min_price = request.query_params.get("min_price")
+    if min_price not in (None, ""):
+        try:
+            Decimal(min_price)
+        except (TypeError, ValueError, InvalidOperation):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    max_delivery_time = request.query_params.get("max_delivery_time")
+    if max_delivery_time not in (None, ""):
+        try:
+            int(max_delivery_time)
+        except (TypeError, ValueError):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    return None
+
+
 def _create_offer_from_request(request):
     """Create an offer from request payload."""
     serializer = OfferCreateSerializer(
@@ -93,6 +121,9 @@ class OffersListCreateView(APIView):
         ordering, is_valid = _get_ordering_param(request, allowed)
         if not is_valid:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        response = _validate_offer_filters(request)
+        if response:
+            return response
         queryset = _offers_base_queryset()
         queryset = _annotate_offer_queryset(queryset)
         queryset = _apply_offers_filters(queryset, request)
