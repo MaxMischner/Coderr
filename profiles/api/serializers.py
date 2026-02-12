@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from markt_coderr.models import Profile
+from profiles.models import Profile
 
 
 def _normalize_nulls(data, keys):

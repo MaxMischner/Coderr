@@ -5,7 +5,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from markt_coderr.models import Profile
+from profiles.models import Profile
 
 User = get_user_model()
 

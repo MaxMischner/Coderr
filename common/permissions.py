@@ -3,7 +3,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import permissions
 
-from markt_coderr.models import Profile
+from profiles.models import Profile
 
 User = get_user_model()
 

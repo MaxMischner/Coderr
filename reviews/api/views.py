@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from common.permissions import IsCustomerUser, IsReviewOwner
 from common.utils import _apply_ordering, _get_ordering_param
-from markt_coderr.models import Review
+from reviews.models import Review
 from reviews.api.serializers import ReviewCreateSerializer, ReviewSerializer, ReviewUpdateSerializer
 
 

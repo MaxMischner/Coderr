@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from markt_coderr.models import Review
+from reviews.models import Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):

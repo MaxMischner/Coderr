@@ -5,7 +5,9 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from markt_coderr.models import Offer, Profile, Review
+from offers.models import Offer
+from profiles.models import Profile
+from reviews.models import Review
 
 
 class BaseInfoView(APIView):

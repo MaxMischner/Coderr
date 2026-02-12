@@ -14,7 +14,7 @@ from common.utils import (
     _get_ordering_param,
     _paginated_response,
 )
-from markt_coderr.models import Offer, OfferDetail
+from offers.models import Offer, OfferDetail
 from offers.api.serializers import (
     OfferCreateSerializer,
     OfferDetailSerializer,

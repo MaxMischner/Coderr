@@ -9,7 +9,9 @@ from rest_framework.views import APIView
 
 from common.permissions import IsCustomerUser, IsOrderBusinessOwner, IsStaffUser
 from common.utils import _get_or_create_profile
-from markt_coderr.models import OfferDetail, Order, Profile
+from offers.models import OfferDetail
+from orders.models import Order
+from profiles.models import Profile
 from orders.api.serializers import OrderSerializer, OrderStatusUpdateSerializer
 
 User = get_user_model()
@@ -24,8 +26,11 @@ def _get_offer_detail_or_response(request):
     """Return offer detail or a bad request response."""
     if "offer_detail_id" not in request.data:
         return None, Response(status=status.HTTP_400_BAD_REQUEST)
-    offer_detail = get_object_or_404(
-        OfferDetail, pk=request.data.get("offer_detail_id"))
+    try:
+        offer_detail_id = request.data.get("offer_detail_id")
+        offer_detail = get_object_or_404(OfferDetail, pk=offer_detail_id)
+    except (TypeError, ValueError):
+        return None, Response(status=status.HTTP_400_BAD_REQUEST)
     return offer_detail, None
 
 

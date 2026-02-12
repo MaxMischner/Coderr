@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'reviews',
     'auths',
     'base_info',
-    'markt_coderr',
 ]
 
 MIDDLEWARE = [

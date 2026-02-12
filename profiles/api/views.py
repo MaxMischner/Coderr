@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from common.permissions import IsProfileOwner
 from common.utils import _get_or_create_profile
-from markt_coderr.models import Profile
+from profiles.models import Profile
 from profiles.api.serializers import (
     BusinessProfileListSerializer,
     CustomerProfileListSerializer,

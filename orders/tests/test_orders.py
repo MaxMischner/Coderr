@@ -145,6 +145,13 @@ class OrdersCreateApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_create_order_offer_detail_id_invalid_type(self):
+        self.client.force_authenticate(user=self.customer_user)
+        response = self.client.post(
+            self.url, {"offer_detail_id": "not-an-integer"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_create_order_offer_detail_not_found(self):
         self.client.force_authenticate(user=self.customer_user)
         response = self.client.post(

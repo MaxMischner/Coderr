@@ -2,7 +2,8 @@
 
 from rest_framework import serializers
 
-from markt_coderr.models import OfferDetail, Order
+from offers.models import OfferDetail
+from orders.models import Order
 
 
 def _get_offer_detail_by_id(offer_detail_id):

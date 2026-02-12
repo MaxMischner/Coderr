@@ -3,7 +3,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from markt_coderr.models import Offer, OfferDetail
+from offers.models import Offer, OfferDetail
 
 
 def _min_or_none(values):

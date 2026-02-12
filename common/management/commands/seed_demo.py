@@ -3,7 +3,10 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from markt_coderr.models import Offer, OfferDetail, Order, Profile, Review
+from offers.models import Offer, OfferDetail
+from orders.models import Order
+from profiles.models import Profile
+from reviews.models import Review
 
 
 USERS_DATA = [
